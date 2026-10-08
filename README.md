@@ -10,10 +10,8 @@ An AI-powered, interactive career navigation platform that helps students discov
 
 | Resource | Link |
 |---|---|
-| 🚀 Live Demo | **[ADD DEPLOYED LINK HERE]** |
-| 💻 GitHub Repository | **[ADD GITHUB REPOSITORY LINK HERE]** |
-| 🎥 Demo Video | **[ADD DEMO VIDEO LINK HERE - OPTIONAL]** |
-| 📄 Hackathon Submission | **[ADD SUBMISSION LINK HERE - OPTIONAL]** |
+| 🚀 Live Demo | **https://ucnp.vercel.app/** |
+| 💻 GitHub Repository | **[https://github.com/Aman-Rajput-0001/UCNP-Universal-Career-Navigation-Platform-/tree/main]** |
 
 > **Before submission:** Replace all `[ADD ... HERE]` placeholders with the final links.
 
