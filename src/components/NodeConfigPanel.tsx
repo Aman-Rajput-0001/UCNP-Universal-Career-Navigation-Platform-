@@ -37,7 +37,7 @@ import {
   generateInterviewQuestionsApi,
   evaluateInterviewAnswerApi,
 } from '../services/api'
-import { getStatusColorConfig } from '../nodes/EligibilityCheckerNode'
+import { getStatusColorConfig } from '../nodes/nodeConfig'
 import { ContextualAIAssistant } from './ContextualAIAssistant'
 import { MockInterviewModal } from './MockInterviewModal'
 import type { Edge } from '@xyflow/react'
@@ -53,7 +53,12 @@ interface NodeConfigPanelProps {
     newRemainingNodes: Node<WorkflowNodeData>[],
     newEdges: Edge[]
   ) => void
+  onDeleteNode?: (nodeId: string) => void
   onClose: () => void
+}
+
+function getFormattedTimestamp(): string {
+  return new Date().toLocaleTimeString()
 }
 
 const inputStyle = {
@@ -119,6 +124,7 @@ export function NodeConfigPanel({
   onUpdateNodeData,
   onAddRoadmapNodesAndEdges,
   onReplanRoadmapSteps,
+  onDeleteNode,
   onClose,
 }: NodeConfigPanelProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -323,7 +329,7 @@ export function NodeConfigPanel({
         status: 'success',
         statusMessage: `${responseData.careers.length} Careers Found`,
         careers: responseData.careers,
-        discoveredAt: new Date().toLocaleTimeString(),
+        discoveredAt: getFormattedTimestamp(),
         summaryItems: [
           { label: 'Careers', value: `${responseData.careers.length} Discovered` },
           { label: 'Top Match', value: responseData.careers[0]?.career_name || 'N/A' },
@@ -389,7 +395,7 @@ export function NodeConfigPanel({
         statusMessage: `Status: ${res.status}`,
         targetCareer: careerToTest.trim(),
         eligibilityResult: res,
-        checkedAt: new Date().toLocaleTimeString(),
+        checkedAt: getFormattedTimestamp(),
         summaryItems: [
           { label: 'Target', value: careerToTest.trim() },
           { label: 'Status', value: res.status },
@@ -465,7 +471,7 @@ export function NodeConfigPanel({
         statusMessage: `Level: ${res.skill_level}`,
         targetCareer: careerToTest.trim(),
         skillGapResult: res,
-        analyzedAt: new Date().toLocaleTimeString(),
+        analyzedAt: getFormattedTimestamp(),
         summaryItems: [
           { label: 'Career', value: careerToTest.trim() },
           { label: 'Matched', value: `${res.matched_skills.length} skills` },
@@ -555,7 +561,7 @@ export function NodeConfigPanel({
         statusMessage: `${res.steps.length} Steps Ready`,
         targetCareer: careerToTest.trim(),
         roadmapResult: res,
-        generatedAt: new Date().toLocaleTimeString(),
+        generatedAt: getFormattedTimestamp(),
         summaryItems: [
           { label: 'Target', value: careerToTest.trim() },
           { label: 'Milestones', value: `${res.steps.length} steps` },
@@ -886,7 +892,7 @@ export function NodeConfigPanel({
         targetCareer: res.data.career_name,
         targetSkills: skillsList,
         learningRecommendations: res.data.learning_recommendations,
-        generatedAt: new Date().toLocaleTimeString(),
+        generatedAt: getFormattedTimestamp(),
         summaryItems: [
           { label: 'Role', value: res.data.career_name },
           { label: 'Modules', value: `${res.data.learning_recommendations.length} skills` },
@@ -959,7 +965,7 @@ export function NodeConfigPanel({
         targetCareer: res.data.career_name,
         targetSkills: skillsList,
         projectRecommendations: res.data.project_recommendations,
-        generatedAt: new Date().toLocaleTimeString(),
+        generatedAt: getFormattedTimestamp(),
         summaryItems: [
           { label: 'Role', value: res.data.career_name },
           { label: 'Blueprints', value: `${res.data.project_recommendations.length} projects` },
@@ -1048,7 +1054,7 @@ export function NodeConfigPanel({
         skills: skillsList,
         projects: candidateProjects,
         interviewSuite: res.data,
-        generatedAt: new Date().toLocaleTimeString(),
+        generatedAt: getFormattedTimestamp(),
         summaryItems: [
           { label: 'Role', value: career },
           { label: 'Suite', value: `${res.data.total_questions_count} Qs` },
@@ -1110,7 +1116,7 @@ export function NodeConfigPanel({
           category: q.category,
           answer: studentAns.trim(),
           evaluation: res.data,
-          answered_at: new Date().toLocaleTimeString(),
+          answered_at: getFormattedTimestamp(),
         },
       }
 
@@ -1199,36 +1205,70 @@ export function NodeConfigPanel({
             </div>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          type="button"
-          style={{
-            background: '#131b2e',
-            border: '1px solid #2d3748',
-            color: '#94a3b8',
-            cursor: 'pointer',
-            fontSize: '14px',
-            width: '26px',
-            height: '26px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '6px',
-            lineHeight: 1,
-            transition: 'all 0.15s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#f8fafc'
-            e.currentTarget.style.borderColor = '#3b82f6'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#94a3b8'
-            e.currentTarget.style.borderColor = '#2d3748'
-          }}
-          title="Close Inspector"
-        >
-          ✕
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {onDeleteNode && (
+            <button
+              onClick={() => onDeleteNode(selectedNode.id)}
+              type="button"
+              style={{
+                background: '#2d1515',
+                border: '1px solid #7f1d1d',
+                color: '#f87171',
+                cursor: 'pointer',
+                fontSize: '12px',
+                width: '26px',
+                height: '26px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '6px',
+                lineHeight: 1,
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#991b1b'
+                e.currentTarget.style.color = '#ffffff'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#2d1515'
+                e.currentTarget.style.color = '#f87171'
+              }}
+              title="Delete node from canvas"
+            >
+              🗑️
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            type="button"
+            style={{
+              background: '#131b2e',
+              border: '1px solid #2d3748',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              fontSize: '14px',
+              width: '26px',
+              height: '26px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '6px',
+              lineHeight: 1,
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#f8fafc'
+              e.currentTarget.style.borderColor = '#3b82f6'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8'
+              e.currentTarget.style.borderColor = '#2d3748'
+            }}
+            title="Close Inspector"
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       {/* Form Content */}
@@ -4796,6 +4836,56 @@ export function NodeConfigPanel({
                 style={{ ...inputStyle, resize: 'vertical' }}
               />
             </div>
+          </div>
+        )}
+
+        {/* Node Danger Zone: Delete Node */}
+        {onDeleteNode && (
+          <div
+            style={{
+              marginTop: '28px',
+              paddingTop: '16px',
+              borderTop: '1px solid #1e293b',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            }}
+          >
+            <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 500 }}>
+              Danger Zone
+            </div>
+            <button
+              onClick={() => onDeleteNode(selectedNode.id)}
+              type="button"
+              style={{
+                width: '100%',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#f87171',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#dc2626'
+                e.currentTarget.style.color = '#ffffff'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'
+                e.currentTarget.style.color = '#f87171'
+              }}
+              title="Delete this node and all its connected edges"
+            >
+              <span>🗑️</span>
+              <span>Delete Node from Workflow</span>
+            </button>
           </div>
         )}
       </div>

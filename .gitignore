@@ -27,7 +27,20 @@ dist-ssr
 __pycache__/
 *.py[cod]
 *$py.class
+.venv/
 backend/.venv/
-backend/pg_data/
+venv/
+ENV/
+# Environment variables and secrets
 .env
+.env.*
+!.env.example
 backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Database data directories and SQLite dumps
+backend/pg_data/
+*.sqlite
+*.sqlite3
+*.db

@@ -52,3 +52,41 @@ export const NODE_CATEGORY_CONFIGS: Record<NodeCategory, NodeCategoryConfig> = {
   },
 }
 
+export function getStatusColorConfig(status?: 'GREEN' | 'YELLOW' | 'RED') {
+  switch (status) {
+    case 'GREEN':
+      return {
+        badgeText: 'GREEN • DIRECTLY ACCESSIBLE',
+        textColor: '#34d399',
+        bgColor: 'rgba(16, 185, 129, 0.15)',
+        borderColor: 'rgba(16, 185, 129, 0.4)',
+        dotColor: '#10b981',
+      }
+    case 'YELLOW':
+      return {
+        badgeText: 'YELLOW • POSSIBLE WITH UPSKILLING',
+        textColor: '#facc15',
+        bgColor: 'rgba(234, 179, 8, 0.15)',
+        borderColor: 'rgba(234, 179, 8, 0.4)',
+        dotColor: '#eab308',
+      }
+    case 'RED':
+      return {
+        badgeText: 'RED • RESTRICTED ENTRY / BARRIER',
+        textColor: '#f87171',
+        bgColor: 'rgba(239, 68, 68, 0.15)',
+        borderColor: 'rgba(239, 68, 68, 0.4)',
+        dotColor: '#ef4444',
+      }
+    default:
+      return {
+        badgeText: 'PENDING EVALUATION',
+        textColor: '#94a3b8',
+        bgColor: 'rgba(148, 163, 184, 0.15)',
+        borderColor: 'rgba(148, 163, 184, 0.4)',
+        dotColor: '#64748b',
+      }
+  }
+}
+
+

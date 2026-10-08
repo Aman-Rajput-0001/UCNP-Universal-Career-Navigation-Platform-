@@ -39,11 +39,14 @@ def save_student_profile(db: Session, profile_in: StudentProfileCreate) -> Stude
         available_time=(profile_in.availableTime or "").strip(),
     )
 
-    db.add(db_profile)
-    db.commit()
-    db.refresh(db_profile)
-
-    return to_response_dto(db_profile)
+    try:
+        db.add(db_profile)
+        db.commit()
+        db.refresh(db_profile)
+        return to_response_dto(db_profile)
+    except Exception as e:
+        db.rollback()
+        raise e
 
 
 def get_student_profile_by_id(db: Session, profile_id: str) -> Optional[StudentProfileResponse]:

@@ -48,15 +48,18 @@ async def check_eligibility(
     branch = request.branch or ""
     skills = request.skills
 
-    if request.profile_id:
-        profile_record = db.query(StudentProfileModel).filter(
-            StudentProfileModel.id == request.profile_id
-        ).first()
-        if profile_record:
-            education = profile_record.education or education
-            degree = profile_record.degree or degree
-            branch = profile_record.branch or branch
-            skills = list(profile_record.skills or skills)
+    if request.profile_id and db:
+        try:
+            profile_record = db.query(StudentProfileModel).filter(
+                StudentProfileModel.id == request.profile_id
+            ).first()
+            if profile_record:
+                education = profile_record.education or education
+                degree = profile_record.degree or degree
+                branch = profile_record.branch or branch
+                skills = list(profile_record.skills or skills)
+        except Exception:
+            pass
 
     return evaluate_eligibility(
         career_name=request.career_name,
@@ -79,17 +82,20 @@ async def analyze_skill_gap_endpoint(
     current_skills = request.current_skills
 
     # If profile_id is provided, merge with stored profile skills
-    if request.profile_id:
-        profile_record = db.query(StudentProfileModel).filter(
-            StudentProfileModel.id == request.profile_id
-        ).first()
-        if profile_record and profile_record.skills:
-            # Merge and preserve unique order
-            existing_set = set(s.lower() for s in current_skills)
-            for s in profile_record.skills:
-                if s.lower() not in existing_set:
-                    current_skills.append(s)
-                    existing_set.add(s.lower())
+    if request.profile_id and db:
+        try:
+            profile_record = db.query(StudentProfileModel).filter(
+                StudentProfileModel.id == request.profile_id
+            ).first()
+            if profile_record and profile_record.skills:
+                # Merge and preserve unique order
+                existing_set = set(s.lower() for s in current_skills)
+                for s in profile_record.skills:
+                    if s.lower() not in existing_set:
+                        current_skills.append(s)
+                        existing_set.add(s.lower())
+        except Exception:
+            pass
 
     enriched_request = SkillGapRequest(
         profile_id=request.profile_id,

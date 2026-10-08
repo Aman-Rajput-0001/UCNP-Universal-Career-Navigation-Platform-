@@ -1,6 +1,9 @@
+import os
+import json
+import time
 from contextlib import asynccontextmanager
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.api.health import router as health_router
@@ -40,13 +43,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enable CORS for local frontend development (Vite standard ports)
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+# Enable CORS with configurable origins via environment variable
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "").strip()
+if allowed_origins_env:
+    origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+else:
+    origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,6 +62,56 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def log_api_requests_and_responses(request: Request, call_next):
+    """
+    Logs every incoming API call and prints the status and response JSON directly on the terminal.
+    """
+    start_time = time.time()
+    method = request.method
+    path = request.url.path
+
+    print(f"\n==================== [API CALL RECEIVED] ====================")
+    print(f">> [INCOMING REQUEST]: {method} {path}")
+    if request.query_params:
+        print(f">> Query Parameters: {dict(request.query_params)}")
+
+    try:
+        response = await call_next(request)
+        duration_ms = round((time.time() - start_time) * 1000, 2)
+
+        # Intercept response body stream to print JSON in terminal
+        chunks = [chunk async for chunk in response.body_iterator]
+        body_bytes = b"".join(chunks)
+
+        async def stream():
+            for chunk in chunks:
+                yield chunk
+
+        response.body_iterator = stream()
+
+        status_tag = "[SUCCESS]" if response.status_code < 400 else "[CLIENT ERROR]" if response.status_code < 500 else "[SERVER ERROR]"
+        print(f"<< {status_tag} Status {response.status_code} ({duration_ms}ms) -> {method} {path}")
+
+        try:
+            parsed_json = json.loads(body_bytes.decode("utf-8"))
+            print(f"<< [RESPONSE JSON]:\n{json.dumps(parsed_json, indent=2)}")
+        except Exception:
+            text_body = body_bytes.decode("utf-8", errors="replace").strip()
+            if text_body:
+                print(f"<< [RESPONSE BODY]: {text_body[:500]}")
+        print(f"============================================================\n")
+
+        return response
+    except Exception as exc:
+        duration_ms = round((time.time() - start_time) * 1000, 2)
+        print(f"<< [FAILED] ({duration_ms}ms) -> {method} {path}")
+        print(f"<< Exception: {type(exc).__name__}: {str(exc)}")
+        print(f"============================================================\n")
+        raise exc
+
 
 # Include API routers
 app.include_router(health_router, prefix="/api", tags=["health"])

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Node } from '@xyflow/react'
 import type {
   WorkflowNodeData,
@@ -19,17 +19,18 @@ interface ContextualAIAssistantProps {
 const assistCache: Record<string, ContextualAssistResponse> = {}
 
 export function ContextualAIAssistant({ selectedNode, nodes }: ContextualAIAssistantProps) {
+  const [prevNodeId, setPrevNodeId] = useState(selectedNode.id)
   const [assistance, setAssistance] = useState<ContextualAssistResponse | null>(
-    assistCache[selectedNode.id] || null
+    () => assistCache[selectedNode.id] || null
   )
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  // When selected node changes, update to cached result if available
-  useEffect(() => {
+  if (prevNodeId !== selectedNode.id) {
+    setPrevNodeId(selectedNode.id)
     setAssistance(assistCache[selectedNode.id] || null)
     setError(null)
-  }, [selectedNode.id])
+  }
 
   // Extract student profile context
   const profileNode = nodes.find((n) => n.type === 'studentProfileNode')

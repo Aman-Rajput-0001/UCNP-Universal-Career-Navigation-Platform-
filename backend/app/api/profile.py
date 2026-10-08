@@ -17,7 +17,13 @@ async def create_profile(
     profile_data: StudentProfileCreate,
     db: Session = Depends(get_db),
 ) -> StudentProfileResponse:
-    return save_student_profile(db, profile_data)
+    try:
+        return save_student_profile(db, profile_data)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to persist student profile: {str(e)}",
+        )
 
 
 @router.get(
@@ -29,7 +35,13 @@ async def get_profile(
     profile_id: str,
     db: Session = Depends(get_db),
 ) -> StudentProfileResponse:
-    profile = get_student_profile_by_id(db, profile_id)
+    try:
+        profile = get_student_profile_by_id(db, profile_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error retrieving profile: {str(e)}",
+        )
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

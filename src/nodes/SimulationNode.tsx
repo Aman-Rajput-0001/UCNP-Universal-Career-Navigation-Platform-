@@ -2,7 +2,7 @@ import { memo } from 'react'
 import type { NodeProps, Node } from '@xyflow/react'
 import { BaseWorkflowNode } from './BaseWorkflowNode'
 import type { SimulationNodeData } from '../types/workflow'
-import { getStatusColorConfig } from './EligibilityCheckerNode'
+import { getStatusColorConfig } from './nodeConfig'
 
 export const SimulationNode = memo(function SimulationNode(
   props: NodeProps<Node<SimulationNodeData>>

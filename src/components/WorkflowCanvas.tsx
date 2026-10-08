@@ -43,13 +43,14 @@ import type {
 } from '../types/workflow'
 
 const defaultInitialNodes: Node<WorkflowNodeData>[] = [
+  // 1. INPUT
   {
     id: 'student-profile-1',
     type: 'studentProfileNode',
-    position: { x: 380, y: 160 },
+    position: { x: 100, y: 140 },
     data: {
       title: 'Student Profile',
-      description: 'Universal background & career context',
+      description: 'Education, strengths & career preferences',
       category: 'input',
       icon: '🎓',
       status: 'idle',
@@ -63,15 +64,345 @@ const defaultInitialNodes: Node<WorkflowNodeData>[] = [
       weaknesses: 'Networking, Public Speaking',
       careerGoal: 'AI Engineer / Full Stack Developer',
       availableTime: '15 hrs/week',
+      summaryItems: [
+        { label: 'Category', value: 'INPUT' },
+        { label: 'Focus', value: 'Background & Skills' },
+      ],
     } as StudentProfileNodeData,
+  },
+  // 2. DISCOVERY
+  {
+    id: 'career-discovery-1',
+    type: 'careerDiscoveryNode',
+    position: { x: 460, y: 140 },
+    data: {
+      title: 'Career Discovery',
+      description: 'Discover viable careers irrespective of degree limitations',
+      category: 'discovery',
+      icon: '🧭',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'DISCOVERY' },
+        { label: 'Scope', value: 'Skill & Interest Matching' },
+      ],
+    },
+  },
+  // 3. ANALYSIS
+  {
+    id: 'eligibility-checker-1',
+    type: 'eligibilityCheckerNode',
+    position: { x: 820, y: 140 },
+    data: {
+      title: 'Eligibility Checker',
+      description: 'Check eligibility criteria & non-degree entry routes',
+      category: 'analysis',
+      icon: '✅',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'ANALYSIS' },
+        { label: 'Criteria', value: 'Degrees vs Skill routes' },
+      ],
+    },
+  },
+  {
+    id: 'skill-gap-analysis-1',
+    type: 'skillGapAnalysisNode',
+    position: { x: 1180, y: 140 },
+    data: {
+      title: 'Skill Gap Analysis',
+      description: 'Identify missing core and emerging skill gaps',
+      category: 'analysis',
+      icon: '📊',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'ANALYSIS' },
+        { label: 'Benchmark', value: 'Target Competencies' },
+      ],
+    },
+  },
+  // 4. GOAL
+  {
+    id: 'career-goal-1',
+    type: 'careerGoalNode',
+    position: { x: 1180, y: 390 },
+    data: {
+      title: 'Career Goal',
+      description: 'Target role, expected timeline & compensation',
+      category: 'career',
+      icon: '🎯',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'GOAL' },
+        { label: 'Target', value: 'Full Stack Developer / AI' },
+      ],
+    },
+  },
+  // 5. ROADMAP
+  {
+    id: 'ai-roadmap-1',
+    type: 'aiRoadmapNode',
+    position: { x: 820, y: 390 },
+    data: {
+      title: 'AI Roadmap',
+      description: 'Step-by-step personalized career transition plan',
+      category: 'roadmap',
+      icon: '🗺️',
+      status: 'idle',
+      targetCareer: 'Full Stack Developer',
+      summaryItems: [
+        { label: 'Category', value: 'ROADMAP' },
+        { label: 'Plan', value: 'Adaptive Milestones' },
+      ],
+    } as AIRoadmapNodeData,
+  },
+  // 6. EXECUTION
+  {
+    id: 'learning-1',
+    type: 'learningNode',
+    position: { x: 460, y: 390 },
+    data: {
+      title: 'Learning',
+      description: 'Curated courses, docs, tutorials & practice material',
+      category: 'learning',
+      icon: '📚',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'EXECUTION' },
+        { label: 'Content', value: 'Courses & Tutorials' },
+      ],
+    },
+  },
+  {
+    id: 'projects-1',
+    type: 'projectsNode',
+    position: { x: 100, y: 390 },
+    data: {
+      title: 'Projects',
+      description: 'Proof-of-work project suggestions with GitHub guidance',
+      category: 'learning',
+      icon: '🛠️',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'EXECUTION' },
+        { label: 'Portfolio', value: 'Production Blueprints' },
+      ],
+    },
+  },
+  {
+    id: 'certification-1',
+    type: 'certificationNode',
+    position: { x: 100, y: 640 },
+    data: {
+      title: 'Certification',
+      description: 'Recognized industry credentials and accreditations',
+      category: 'learning',
+      icon: '📜',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'EXECUTION' },
+        { label: 'Validation', value: 'Industry Credentials' },
+      ],
+    },
+  },
+  {
+    id: 'internship-1',
+    type: 'internshipNode',
+    position: { x: 460, y: 640 },
+    data: {
+      title: 'Internship',
+      description: 'Entry-level work opportunities and experiential learning',
+      category: 'action',
+      icon: '💼',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'EXECUTION' },
+        { label: 'Hands-on', value: 'Industry Apprenticeship' },
+      ],
+    },
+  },
+  {
+    id: 'resume-1',
+    type: 'resumeNode',
+    position: { x: 820, y: 640 },
+    data: {
+      title: 'Resume',
+      description: 'Skill-first ATS resume generation & optimization',
+      category: 'action',
+      icon: '📄',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'EXECUTION' },
+        { label: 'Format', value: 'ATS Tailored' },
+      ],
+    },
+  },
+  {
+    id: 'interview-1',
+    type: 'interviewNode',
+    position: { x: 1180, y: 640 },
+    data: {
+      title: 'Interview',
+      description: 'Role-specific mock interview simulations & feedback',
+      category: 'action',
+      icon: '🎤',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'EXECUTION' },
+        { label: 'Prep', value: 'Technical & Behavioral' },
+      ],
+    },
+  },
+  // 7. CAREER GROWTH
+  {
+    id: 'job-1',
+    type: 'jobNode',
+    position: { x: 1180, y: 890 },
+    data: {
+      title: 'Job',
+      description: 'Curated job opportunities matched to candidate capabilities',
+      category: 'career',
+      icon: '🚀',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'CAREER GROWTH' },
+        { label: 'Target Role', value: 'Full-time Placement' },
+      ],
+    },
+  },
+  {
+    id: 'career-growth-1',
+    type: 'careerGrowthNode',
+    position: { x: 820, y: 890 },
+    data: {
+      title: 'Career Growth',
+      description: 'Long-term promotion, upskilling and leadership tracking',
+      category: 'career',
+      icon: '📈',
+      status: 'idle',
+      summaryItems: [
+        { label: 'Category', value: 'CAREER GROWTH' },
+        { label: 'Ladder', value: 'Promotion & Seniority' },
+      ],
+    },
   },
 ]
 
-const defaultInitialEdges: Edge[] = []
+const defaultInitialEdges: Edge[] = [
+  // INPUT → DISCOVERY
+  {
+    id: 'edge-1-2',
+    source: 'student-profile-1',
+    target: 'career-discovery-1',
+    animated: true,
+    style: { stroke: '#4f46e5', strokeWidth: 2.5 },
+  },
+  // DISCOVERY → ELIGIBILITY
+  {
+    id: 'edge-2-3',
+    source: 'career-discovery-1',
+    target: 'eligibility-checker-1',
+    animated: true,
+    style: { stroke: '#4f46e5', strokeWidth: 2.5 },
+  },
+  // ELIGIBILITY → SKILL GAP
+  {
+    id: 'edge-3-4',
+    source: 'eligibility-checker-1',
+    target: 'skill-gap-analysis-1',
+    animated: true,
+    style: { stroke: '#4f46e5', strokeWidth: 2.5 },
+  },
+  // SKILL GAP → CAREER GOAL
+  {
+    id: 'edge-4-5',
+    source: 'skill-gap-analysis-1',
+    target: 'career-goal-1',
+    animated: true,
+    style: { stroke: '#6366f1', strokeWidth: 2.5 },
+  },
+  // CAREER GOAL → AI ROADMAP
+  {
+    id: 'edge-5-6',
+    source: 'career-goal-1',
+    target: 'ai-roadmap-1',
+    animated: true,
+    style: { stroke: '#6366f1', strokeWidth: 2.5 },
+  },
+  // AI ROADMAP → LEARNING
+  {
+    id: 'edge-6-7',
+    source: 'ai-roadmap-1',
+    target: 'learning-1',
+    animated: true,
+    style: { stroke: '#6366f1', strokeWidth: 2.5 },
+  },
+  // LEARNING → PROJECTS
+  {
+    id: 'edge-7-8',
+    source: 'learning-1',
+    target: 'projects-1',
+    animated: true,
+    style: { stroke: '#06b6d4', strokeWidth: 2.5 },
+  },
+  // PROJECTS → CERTIFICATION
+  {
+    id: 'edge-8-9',
+    source: 'projects-1',
+    target: 'certification-1',
+    animated: true,
+    style: { stroke: '#06b6d4', strokeWidth: 2.5 },
+  },
+  // CERTIFICATION → INTERNSHIP
+  {
+    id: 'edge-9-10',
+    source: 'certification-1',
+    target: 'internship-1',
+    animated: true,
+    style: { stroke: '#06b6d4', strokeWidth: 2.5 },
+  },
+  // INTERNSHIP → RESUME
+  {
+    id: 'edge-10-11',
+    source: 'internship-1',
+    target: 'resume-1',
+    animated: true,
+    style: { stroke: '#3b82f6', strokeWidth: 2.5 },
+  },
+  // RESUME → INTERVIEW
+  {
+    id: 'edge-11-12',
+    source: 'resume-1',
+    target: 'interview-1',
+    animated: true,
+    style: { stroke: '#3b82f6', strokeWidth: 2.5 },
+  },
+  // INTERVIEW → JOB
+  {
+    id: 'edge-12-13',
+    source: 'interview-1',
+    target: 'job-1',
+    animated: true,
+    style: { stroke: '#10b981', strokeWidth: 2.5 },
+  },
+  // JOB → CAREER GROWTH
+  {
+    id: 'edge-13-14',
+    source: 'job-1',
+    target: 'career-growth-1',
+    animated: true,
+    style: { stroke: '#10b981', strokeWidth: 2.5 },
+  },
+]
 
 export function WorkflowCanvas() {
-  const [nodes, setNodes] = useState<Node<WorkflowNodeData>[]>(defaultInitialNodes)
-  const [edges, setEdges] = useState<Edge[]>(defaultInitialEdges)
+  const [nodes, setNodes] = useState<Node<WorkflowNodeData>[]>(() => {
+    const saved = loadWorkflowFromLocalStorage()
+    return saved ? saved.nodes : defaultInitialNodes
+  })
+  const [edges, setEdges] = useState<Edge[]>(() => {
+    const saved = loadWorkflowFromLocalStorage()
+    return saved ? saved.edges : defaultInitialEdges
+  })
   const [isLibraryOpen, setIsLibraryOpen] = useState(true)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -99,17 +430,9 @@ export function WorkflowCanvas() {
     }
   }, [])
 
-  // Load existing workflow from localStorage on initial mount if available and hydrate persisted progress
+  // Hydrate roadmap progress from backend on initial mount if a roadmap node is present
   useEffect(() => {
-    const saved = loadWorkflowFromLocalStorage()
-    const activeNodes = saved ? saved.nodes : nodes
-    if (saved) {
-      setNodes(saved.nodes)
-      setEdges(saved.edges)
-    }
-
-    // Attempt to hydrate roadmap progress from backend
-    const roadmapNode = activeNodes.find((n) => n.type === 'aiRoadmapNode')
+    const roadmapNode = nodes.find((n) => n.type === 'aiRoadmapNode')
     if (roadmapNode) {
       const roadmapId = roadmapNode.id
       fetchRoadmapProgressApi(roadmapId).then((res) => {
@@ -160,6 +483,7 @@ export function WorkflowCanvas() {
         }
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Auto-dismiss notification toast
@@ -316,6 +640,116 @@ export function WorkflowCanvas() {
       setToastMessage('No saved workflow found')
     }
   }, [])
+
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId))
+    setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId))
+    setSelectedNodeId((currentId) => (currentId === nodeId ? null : currentId))
+    setToastMessage('Node deleted')
+  }, [])
+
+  // Keyboard shortcut: Press Delete or Backspace to delete selected node
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is currently typing in an input, textarea, or contentEditable element
+      const target = e.target as HTMLElement | null
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+        e.preventDefault()
+        handleDeleteNode(selectedNodeId)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedNodeId, handleDeleteNode])
+
+  // Ergonomic Auto-Layout: Arranges all canvas nodes in a neat, orderly flow
+  const handleAutoLayout = useCallback(() => {
+    if (nodes.length === 0) return
+
+    setNodes((currentNodes) => {
+      const startX = 100
+      const startY = 140
+      const xGap = 360
+      const yGap = 250
+      const nodesPerRow = 4
+
+      // Sequence of the 14 core nodes for optimal visual reading:
+      // Row 1: Student Profile -> Career Discovery -> Eligibility Checker -> Skill Gap Analysis
+      // Row 2: Career Goal -> AI Roadmap -> Learning -> Projects
+      // Row 3: Certification -> Internship -> Resume -> Interview
+      // Row 4: Job -> Career Growth
+      const desiredOrder = [
+        'studentProfileNode',
+        'careerDiscoveryNode',
+        'eligibilityCheckerNode',
+        'skillGapAnalysisNode',
+        'careerGoalNode',
+        'aiRoadmapNode',
+        'learningNode',
+        'projectsNode',
+        'certificationNode',
+        'internshipNode',
+        'resumeNode',
+        'interviewNode',
+        'jobNode',
+        'careerGrowthNode',
+      ]
+
+      // Sort current nodes matching core workflow order first, then others
+      const sorted = [...currentNodes].sort((a, b) => {
+        const idxA = desiredOrder.indexOf(a.type || '')
+        const idxB = desiredOrder.indexOf(b.type || '')
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB
+        if (idxA !== -1) return -1
+        if (idxB !== -1) return 1
+        return 0
+      })
+
+      return sorted.map((node, index) => {
+        const row = Math.floor(index / nodesPerRow)
+        // Snake flow: alternate left-to-right and right-to-left for intuitive edge curves
+        const isReversedRow = row % 2 === 1
+        const col = isReversedRow ? (nodesPerRow - 1 - (index % nodesPerRow)) : (index % nodesPerRow)
+
+        return {
+          ...node,
+          position: {
+            x: startX + col * xGap,
+            y: startY + row * yGap,
+          },
+        }
+      })
+    })
+
+    setToastMessage('Canvas auto-arranged cleanly!')
+  }, [nodes.length])
+
+  const handleDeleteWorkflow = useCallback(() => {
+    if (nodes.length === 0) {
+      setToastMessage('Canvas is already empty')
+      return
+    }
+    const confirmed = window.confirm(
+      'Are you sure you want to delete the entire workflow? This will remove all nodes, connections, and clear saved workflow state.'
+    )
+    if (!confirmed) return
+
+    setNodes([])
+    setEdges([])
+    setSelectedNodeId(null)
+    localStorage.removeItem('career_navigator_workflow')
+    setToastMessage('Workflow deleted')
+  }, [nodes.length])
 
   const handleGenerateCareerProgressionPathway = useCallback(async () => {
     // Determine target career and profile from nodes
@@ -741,33 +1175,113 @@ export function WorkflowCanvas() {
             </span>
           )}
 
-          <button
-            onClick={handleGenerateCareerProgressionPathway}
-            type="button"
-            style={{
-              background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
-              color: '#ffffff',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 4px rgba(79, 70, 229, 0.3)',
-              transition: 'opacity 0.15s ease',
-            }}
-            title="Generate connected chain: Skills → Projects → Portfolio → Resume → Internship → Job → Growth"
-          >
-            <span>🔗</span>
-            <span>Connect Full Pathway</span>
-          </button>
+          {/* Actions Group: Intelligent Flow & Tools */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: '3px 6px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+            <button
+              onClick={handleGenerateCareerProgressionPathway}
+              type="button"
+              style={{
+                background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+                color: '#ffffff',
+                border: 'none',
+                padding: '5px 11px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 2px 4px rgba(79, 70, 229, 0.25)',
+                transition: 'opacity 0.15s ease',
+              }}
+              title="Generate connected progression chain: Skills → Projects → Portfolio → Resume → Internship → Job → Growth"
+            >
+              <span>🔗</span>
+              <span>Full Pathway</span>
+            </button>
 
-          {/* Quick What-If Career Simulation Action */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#131b2e', padding: '2px 4px', borderRadius: '6px', border: '1px solid #334155' }}>
-            <span style={{ fontSize: '11px', color: '#c084fc', fontWeight: 600, paddingLeft: '4px' }}>
+            <button
+              onClick={handleAutoLayout}
+              type="button"
+              style={{
+                background: '#1e293b',
+                color: '#38bdf8',
+                border: '1px solid #334155',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#24344d'
+                e.currentTarget.style.borderColor = '#38bdf8'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#1e293b'
+                e.currentTarget.style.borderColor = '#334155'
+              }}
+              title="Cleanly arrange and space out all nodes on the canvas"
+            >
+              <span>📐</span>
+              <span>Auto-Arrange</span>
+            </button>
+
+            <button
+              onClick={() => setIsCompareOpen(true)}
+              type="button"
+              style={{
+                background: '#065f46',
+                color: '#ffffff',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 1px 3px rgba(6, 95, 70, 0.3)',
+              }}
+              title="Open side-by-side career comparison matrix"
+            >
+              <span>⚖️</span>
+              <span>Compare</span>
+            </button>
+
+            <button
+              onClick={() => setIsMockModalOpen(true)}
+              type="button"
+              style={{
+                background: '#ea580c',
+                color: '#ffffff',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 1px 3px rgba(234, 88, 12, 0.3)',
+              }}
+              title="Launch interactive AI Mock Interview session"
+            >
+              <span>🎙️</span>
+              <span>Mock Interview</span>
+            </button>
+          </div>
+
+          {/* Quick What-If Simulation Dropdown/Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#131b2e', padding: '3px 6px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+            <span style={{ fontSize: '11px', color: '#c084fc', fontWeight: 600, paddingRight: '2px' }}>
               🔮 What-If:
             </span>
             <button
@@ -777,7 +1291,7 @@ export function WorkflowCanvas() {
                 background: '#1e293b',
                 color: '#e2e8f0',
                 border: '1px solid #334155',
-                padding: '4px 8px',
+                padding: '3px 7px',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 fontSize: '11px',
@@ -794,7 +1308,7 @@ export function WorkflowCanvas() {
                 background: '#1e293b',
                 color: '#e2e8f0',
                 border: '1px solid #334155',
-                padding: '4px 8px',
+                padding: '3px 7px',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 fontSize: '11px',
@@ -802,7 +1316,7 @@ export function WorkflowCanvas() {
               }}
               title="Simulate Product Manager pathway"
             >
-              Product Manager
+              PM
             </button>
             <button
               onClick={() => handleSimulateAlternativeCareer('Government career')}
@@ -811,7 +1325,7 @@ export function WorkflowCanvas() {
                 background: '#1e293b',
                 color: '#e2e8f0',
                 border: '1px solid #334155',
-                padding: '4px 8px',
+                padding: '3px 7px',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 fontSize: '11px',
@@ -819,110 +1333,98 @@ export function WorkflowCanvas() {
               }}
               title="Simulate Government career pathway"
             >
-              Government
+              Govt
             </button>
           </div>
 
-          <button
-            onClick={() => setIsCompareOpen(true)}
-            type="button"
-            style={{
-              background: '#047857',
-              color: '#ffffff',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 4px rgba(4, 120, 87, 0.3)',
-            }}
-            title="Open side-by-side career comparison matrix"
-          >
-            <span>⚖️</span>
-            <span>Compare Careers</span>
-          </button>
+          {/* Canvas Storage & Reset Group */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: '3px 6px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+            <button
+              onClick={handleSaveWorkflow}
+              type="button"
+              style={{
+                background: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'background-color 0.15s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+              title="Save workflow state to browser local storage"
+            >
+              💾 Save
+            </button>
 
-          <button
-            onClick={() => setIsMockModalOpen(true)}
-            type="button"
-            style={{
-              background: 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)',
-              color: '#ffffff',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 4px rgba(234, 88, 12, 0.3)',
-            }}
-            title="Launch interactive AI Mock Interview session"
-          >
-            <span>🎙️</span>
-            <span>Mock Interview</span>
-          </button>
+            <button
+              onClick={handleLoadWorkflow}
+              type="button"
+              style={{
+                background: '#1e293b',
+                color: '#e2e8f0',
+                border: '1px solid #334155',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#273549'
+                e.currentTarget.style.borderColor = '#475569'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#1e293b'
+                e.currentTarget.style.borderColor = '#334155'
+              }}
+              title="Load saved workflow state from storage"
+            >
+              📂 Load
+            </button>
 
-          <button
-            onClick={handleSaveWorkflow}
-            type="button"
-            style={{
-              background: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 4px rgba(37, 99, 235, 0.3)',
-              transition: 'background-color 0.15s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
-            title="Save workflow state to browser local storage"
-          >
-            💾 Save Workflow
-          </button>
-
-          <button
-            onClick={handleLoadWorkflow}
-            type="button"
-            style={{
-              background: '#1e293b',
-              color: '#e2e8f0',
-              border: '1px solid #334155',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#273549'
-              e.currentTarget.style.borderColor = '#475569'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#1e293b'
-              e.currentTarget.style.borderColor = '#334155'
-            }}
-            title="Load saved workflow state from storage"
-          >
-            📂 Load Workflow
-          </button>
+            <button
+              onClick={handleDeleteWorkflow}
+              type="button"
+              style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                color: '#f87171',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11.5px',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#dc2626'
+                e.currentTarget.style.color = '#ffffff'
+                e.currentTarget.style.borderColor = '#dc2626'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'
+                e.currentTarget.style.color = '#f87171'
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.35)'
+              }}
+              title="Clear canvas and reset workflow"
+            >
+              🗑️ Clear
+            </button>
+          </div>
         </div>
       </header>
 
@@ -992,6 +1494,97 @@ export function WorkflowCanvas() {
               }}
             />
           </ReactFlow>
+
+          {/* Empty Canvas Quick-Start Helper */}
+          {nodes.length === 0 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                border: '1px solid #334155',
+                borderRadius: '16px',
+                padding: '28px 36px',
+                textAlign: 'center',
+                maxWidth: '440px',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
+                backdropFilter: 'blur(8px)',
+                zIndex: 20,
+              }}
+            >
+              <div style={{ fontSize: '36px', marginBottom: '12px' }}>🧭</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: '#f8fafc', marginBottom: '8px' }}>
+                Your Canvas is Ready
+              </div>
+              <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5, marginBottom: '20px' }}>
+                Start by adding nodes from the left library, or load a connected career progression pathway with one click.
+              </div>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                <button
+                  onClick={() => setIsLibraryOpen(true)}
+                  type="button"
+                  style={{
+                    backgroundColor: '#1e293b',
+                    color: '#e2e8f0',
+                    border: '1px solid #334155',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  ⚡ Browse Node Library
+                </button>
+                <button
+                  onClick={handleGenerateCareerProgressionPathway}
+                  type="button"
+                  style={{
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(79, 70, 229, 0.4)',
+                  }}
+                >
+                  🔗 Create Full Pathway
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Helpful Canvas Shortcuts Pill */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '14px',
+              left: '16px',
+              backgroundColor: 'rgba(11, 17, 32, 0.85)',
+              border: '1px solid #1e293b',
+              borderRadius: '20px',
+              padding: '4px 12px',
+              fontSize: '11px',
+              color: '#64748b',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              pointerEvents: 'none',
+              backdropFilter: 'blur(4px)',
+              zIndex: 10,
+            }}
+          >
+            <span>💡 <b>Tip:</b> Click any node to configure</span>
+            <span>•</span>
+            <span>Drag handles to connect</span>
+            <span>•</span>
+            <span><kbd style={{ background: '#1e293b', padding: '1px 5px', borderRadius: '4px', color: '#94a3b8' }}>Del</kbd> to remove</span>
+          </div>
         </div>
 
         {selectedNode && (
@@ -1001,6 +1594,7 @@ export function WorkflowCanvas() {
             onUpdateNodeData={handleUpdateNodeData}
             onAddRoadmapNodesAndEdges={handleAddGeneratedRoadmapSteps}
             onReplanRoadmapSteps={handleReplanRoadmapSteps}
+            onDeleteNode={handleDeleteNode}
             onClose={() => setSelectedNodeId(null)}
           />
         )}

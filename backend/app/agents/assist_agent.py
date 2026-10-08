@@ -25,9 +25,9 @@ class GeminiAssistAIProvider:
     Isolated from service and router layer.
     """
 
-    def __init__(self, api_key: Optional[str] = None, model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
-        self.model = model
+        self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
 
     async def get_contextual_assistance(
         self, request: ContextualAssistRequest

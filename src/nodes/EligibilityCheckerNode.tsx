@@ -1,46 +1,10 @@
 import { memo } from 'react'
 import type { NodeProps, Node } from '@xyflow/react'
-import type { EligibilityCheckerNodeData, EligibilityStatusColor } from '../types/workflow'
+import type { EligibilityCheckerNodeData } from '../types/workflow'
 import { BaseWorkflowNode } from './BaseWorkflowNode'
+import { getStatusColorConfig } from './nodeConfig'
 
 export type EligibilityCheckerNodeType = Node<EligibilityCheckerNodeData, 'eligibilityCheckerNode'>
-
-export function getStatusColorConfig(status?: EligibilityStatusColor) {
-  switch (status) {
-    case 'GREEN':
-      return {
-        badgeText: 'GREEN • DIRECTLY ACCESSIBLE',
-        textColor: '#34d399',
-        bgColor: 'rgba(16, 185, 129, 0.15)',
-        borderColor: 'rgba(16, 185, 129, 0.4)',
-        dotColor: '#10b981',
-      }
-    case 'YELLOW':
-      return {
-        badgeText: 'YELLOW • POSSIBLE WITH UPSKILLING',
-        textColor: '#facc15',
-        bgColor: 'rgba(234, 179, 8, 0.15)',
-        borderColor: 'rgba(234, 179, 8, 0.4)',
-        dotColor: '#eab308',
-      }
-    case 'RED':
-      return {
-        badgeText: 'RED • STATUTORY BARRIER / LICENSURE',
-        textColor: '#f87171',
-        bgColor: 'rgba(239, 68, 68, 0.15)',
-        borderColor: 'rgba(239, 68, 68, 0.4)',
-        dotColor: '#ef4444',
-      }
-    default:
-      return {
-        badgeText: 'AWAITING EVALUATION',
-        textColor: '#94a3b8',
-        bgColor: 'rgba(148, 163, 184, 0.12)',
-        borderColor: 'rgba(148, 163, 184, 0.3)',
-        dotColor: '#64748b',
-      }
-  }
-}
 
 export const EligibilityCheckerNode = memo(function EligibilityCheckerNode({
   data,
