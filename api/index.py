@@ -11,3 +11,4 @@ from backend.app.main import app
 
 # Vercel Python runtime detects standard ASGI / WSGI application
 handler = app
+
