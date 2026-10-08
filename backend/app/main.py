@@ -1,8 +1,18 @@
 import os
+import sys
 import json
 import time
+from pathlib import Path
 from contextlib import asynccontextmanager
 import logging
+
+# Ensure backend directory is in python path for local, container, or serverless deployment
+current_dir = Path(__file__).resolve().parent
+backend_dir = current_dir.parent
+for p in [str(backend_dir), str(current_dir)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
@@ -58,6 +68,7 @@ else:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

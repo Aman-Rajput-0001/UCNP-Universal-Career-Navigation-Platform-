@@ -19,10 +19,11 @@ import type {
   MarketTrendsNodeData,
   StepProgressStatus,
   WorkflowNodeData,
+  FullCareerAnalysisResponse,
 } from '../types/workflow'
 import {
   submitStudentProfile,
-  discoverCareersApi,
+  orchestrateCareerAnalysisApi,
   checkEligibilityApi,
   analyzeSkillGapApi,
   generateRoadmapApi,
@@ -89,21 +90,21 @@ function getEligibilityBadge(level: string) {
   switch (level) {
     case 'direct':
       return {
-        text: 'Direct Entry',
+        text: '🟢 Direct',
         color: '#34d399',
         bg: 'rgba(16, 185, 129, 0.15)',
         border: 'rgba(16, 185, 129, 0.3)',
       }
     case 'additional_requirements':
       return {
-        text: 'Upskilling Required',
+        text: '🟡 Additional Requirements',
         color: '#facc15',
         bg: 'rgba(234, 179, 8, 0.15)',
         border: 'rgba(234, 179, 8, 0.3)',
       }
     case 'restricted':
       return {
-        text: 'Restricted Entry / Statutory Bar',
+        text: '🔴 Restricted',
         color: '#f87171',
         bg: 'rgba(239, 68, 68, 0.15)',
         border: 'rgba(239, 68, 68, 0.3)',
@@ -304,10 +305,10 @@ export function NodeConfigPanel({
 
     onUpdateNodeData(selectedNode.id, {
       status: 'running',
-      statusMessage: 'AI Analyzing Careers...',
+      statusMessage: 'AI Orchestrating Career Workflow...',
     })
 
-    const result = await discoverCareersApi({
+    const result = await orchestrateCareerAnalysisApi({
       profile_id: activeProfileData.profileId,
       education,
       degree: activeProfileData.degreeOrCourse,
@@ -324,22 +325,283 @@ export function NodeConfigPanel({
     setIsSubmitting(false)
 
     if (result.success && result.data) {
-      const responseData = result.data
+      const fullAnalysis: FullCareerAnalysisResponse = result.data
+      const primaryCareer = fullAnalysis.career_options[0]
+      const targetCareerName = fullAnalysis.recommended_career_goal || primaryCareer?.career_name || 'Software Engineer'
+      const timestamp = getFormattedTimestamp()
+
+      // 1. Update Career Discovery Node
       onUpdateNodeData(selectedNode.id, {
         status: 'success',
-        statusMessage: `${responseData.careers.length} Careers Found`,
-        careers: responseData.careers,
-        discoveredAt: getFormattedTimestamp(),
+        statusMessage: `${fullAnalysis.career_options.length} Careers Found`,
+        careers: fullAnalysis.career_options,
+        discoveredAt: timestamp,
         summaryItems: [
-          { label: 'Careers', value: `${responseData.careers.length} Discovered` },
-          { label: 'Top Match', value: responseData.careers[0]?.career_name || 'N/A' },
-          { label: 'Eligibility', value: responseData.careers[0]?.eligibility_level || 'Evaluated' },
+          { label: 'Careers', value: `${fullAnalysis.career_options.length} Discovered` },
+          { label: 'Top Match', value: targetCareerName },
+          { label: 'Eligibility', value: primaryCareer?.eligibility_level || 'Evaluated' },
+        ],
+      })
+
+      // Helper to find and hydrate node by type
+      const updateNodeIfExists = (type: string, dataPatch: Partial<WorkflowNodeData>) => {
+        const target = nodes.find((n) => n.type === type)
+        if (target) {
+          onUpdateNodeData(target.id, dataPatch)
+        }
+      }
+
+      // 2. Hydrate Eligibility Checker Node
+      updateNodeIfExists('eligibilityCheckerNode', {
+        status: 'success',
+        statusMessage: 'Eligibility Evaluated',
+        targetCareer: targetCareerName,
+        checkedAt: timestamp,
+        eligibilityResult: {
+          status: primaryCareer?.eligibility_level === 'direct' ? 'GREEN' : primaryCareer?.eligibility_level === 'additional_requirements' ? 'YELLOW' : 'RED',
+          qualification_requirements: primaryCareer?.qualification_requirements || 'Relevant degree or verified portfolio credentials',
+          additional_requirements: primaryCareer?.missing_skills || [],
+          missing_requirements: primaryCareer?.missing_skills || [],
+          explanation: primaryCareer?.match_reason || 'Evaluated by AI Career Orchestrator',
+        },
+        summaryItems: [
+          { label: 'Status', value: primaryCareer?.eligibility_level === 'direct' ? 'Direct Entry' : primaryCareer?.eligibility_level === 'additional_requirements' ? 'Bridging Skills' : 'Restricted' },
+          { label: 'Career', value: targetCareerName },
+        ],
+      })
+
+      // 3. Hydrate Skill Gap Analysis Node
+      updateNodeIfExists('skillGapAnalysisNode', {
+        status: 'success',
+        statusMessage: `${fullAnalysis.skill_gap.missing_skills.length} Gaps Identified`,
+        targetCareer: targetCareerName,
+        analyzedAt: timestamp,
+        skillGapResult: fullAnalysis.skill_gap,
+        summaryItems: [
+          { label: 'Level', value: fullAnalysis.skill_gap.skill_level },
+          { label: 'Matched', value: `${fullAnalysis.skill_gap.matched_skills.length} Skills` },
+          { label: 'To Bridge', value: `${fullAnalysis.skill_gap.missing_skills.length} Skills` },
+        ],
+      })
+
+      // 4. Hydrate Career Goal Node
+      updateNodeIfExists('careerGoalNode', {
+        status: 'success',
+        statusMessage: 'Goal Formulated',
+        title: 'Career Goal',
+        summaryItems: [
+          { label: 'Target Role', value: targetCareerName },
+          { label: 'Benchmark Level', value: fullAnalysis.skill_gap.skill_level || 'Entry / Junior' },
+        ],
+      })
+
+      // 5. Hydrate AI Roadmap Node
+      updateNodeIfExists('aiRoadmapNode', {
+        status: 'success',
+        statusMessage: `${fullAnalysis.roadmap.length} Milestones Ready`,
+        targetCareer: targetCareerName,
+        generatedAt: timestamp,
+        roadmapResult: {
+          career_name: targetCareerName,
+          total_estimated_duration: '6-9 Months',
+          summary: `Transition path for ${targetCareerName} aligned with stated capabilities.`,
+          steps: fullAnalysis.roadmap.map((m, idx) => ({
+            id: `step-${idx + 1}`,
+            title: m,
+            type: idx === 0 ? 'learning' : idx === 1 ? 'project' : idx === 2 ? 'certification' : idx === 3 ? 'internship' : 'job',
+            description: `Key focus: ${m}`,
+            prerequisites: idx > 0 ? [`step-${idx}`] : [],
+            skills: fullAnalysis.skill_gap.missing_skills.slice(idx * 2, (idx + 1) * 2),
+            estimated_duration: '4-6 Weeks',
+            projects: fullAnalysis.projects[idx] ? [fullAnalysis.projects[idx].title] : [],
+            resources: ['Official Documentation', 'Open-source code repositories'],
+            completion_criteria: `Milestone verified via portfolio deliverable or practice drill`,
+          })),
+        },
+        summaryItems: [
+          { label: 'Phases', value: `${fullAnalysis.roadmap.length} Milestones` },
+          { label: 'Duration', value: '6-9 Months' },
+        ],
+      })
+
+      // 6. Hydrate Learning Node
+      updateNodeIfExists('learningNode', {
+        status: 'success',
+        statusMessage: `${fullAnalysis.learning_steps.length} Learning Modules`,
+        targetCareer: targetCareerName,
+        targetSkills: fullAnalysis.skill_gap.missing_skills,
+        generatedAt: timestamp,
+        learningRecommendations: fullAnalysis.learning_steps.map((ls) => ({
+          skill_name: ls.title,
+          what_to_learn: ls.skills_covered,
+          learning_sequence: [ls.description],
+          estimated_time: ls.duration,
+          prerequisite_knowledge: ['Basic foundational problem-solving'],
+          practice_drill: ls.practice_drill,
+        })),
+        summaryItems: [
+          { label: 'Modules', value: `${fullAnalysis.learning_steps.length} Modules` },
+          { label: 'Scope', value: fullAnalysis.learning_steps[0]?.duration || '3-4 Weeks' },
+        ],
+      })
+
+      // 7. Hydrate Projects Node
+      updateNodeIfExists('projectsNode', {
+        status: 'success',
+        statusMessage: `${fullAnalysis.projects.length} Blueprints Ready`,
+        targetCareer: targetCareerName,
+        targetSkills: fullAnalysis.skill_gap.missing_skills,
+        generatedAt: timestamp,
+        projectRecommendations: fullAnalysis.projects.map((p) => ({
+          project_title: p.title,
+          difficulty: p.difficulty,
+          skills_practiced: p.technologies,
+          expected_outcome: p.description,
+          portfolio_value: p.portfolio_value,
+        })),
+        summaryItems: [
+          { label: 'Projects', value: `${fullAnalysis.projects.length} Blueprints` },
+          { label: 'Primary', value: fullAnalysis.projects[0]?.title || 'Cap-stone Build' },
+        ],
+      })
+
+      // 8. Hydrate Certification Node
+      updateNodeIfExists('certificationNode', {
+        status: 'success',
+        statusMessage: `${fullAnalysis.certifications.length} Certifications`,
+        summaryItems: [
+          { label: 'Top Credential', value: fullAnalysis.certifications[0]?.name || 'AWS / Industry Credential' },
+          { label: 'Issuer', value: fullAnalysis.certifications[0]?.issuer || 'Standard Body' },
+        ],
+      })
+
+      // 9. Hydrate Internship Node
+      updateNodeIfExists('internshipNode', {
+        status: 'success',
+        statusMessage: 'Path Formulated',
+        targetCareer: targetCareerName,
+        generatedAt: timestamp,
+        internshipData: {
+          id: 'intern-1',
+          title: fullAnalysis.internship_path.target_roles[0] || `Junior ${targetCareerName} Intern`,
+          organization_type: 'Growth-Stage Tech Startup / Scaleup',
+          duration: fullAnalysis.internship_path.timing_window,
+          stipend_range: '$500 - $1,500 / month (or equivalent benchmark)',
+          location_type: 'Remote / Hybrid',
+          required_skills: fullAnalysis.skill_gap.matched_skills.concat(fullAnalysis.skill_gap.missing_skills.slice(0, 2)),
+          learning_outcomes: fullAnalysis.internship_path.prerequisites,
+          conversion_potential: fullAnalysis.internship_path.conversion_strategy,
+          is_demo_blueprint: false,
+        },
+        summaryItems: [
+          { label: 'Role', value: fullAnalysis.internship_path.target_roles[0] || 'Junior Intern' },
+          { label: 'Window', value: fullAnalysis.internship_path.timing_window },
+        ],
+      })
+
+      // 10. Hydrate Resume Node
+      updateNodeIfExists('resumeNode', {
+        status: 'success',
+        statusMessage: 'ATS Optimized',
+        summaryItems: [
+          { label: 'Headline', value: fullAnalysis.resume_guidance.headline },
+          { label: 'Keywords', value: `${fullAnalysis.resume_guidance.top_keywords.length} ATS terms` },
+        ],
+      })
+
+      // 11. Hydrate Interview Node
+      updateNodeIfExists('interviewNode', {
+        status: 'success',
+        statusMessage: `${fullAnalysis.interview_preparation.technical_questions.length} Questions Ready`,
+        targetCareer: targetCareerName,
+        generatedAt: timestamp,
+        skills: fullAnalysis.skill_gap.matched_skills,
+        projects: fullAnalysis.projects.map((p) => p.title),
+        interviewSuite: {
+          career_name: targetCareerName,
+          technical_questions: fullAnalysis.interview_preparation.technical_questions.map((q, idx) => ({
+            id: `tech-${idx + 1}`,
+            category: 'technical',
+            question: q,
+            context_or_tip: fullAnalysis.interview_preparation.preparation_tips[idx % fullAnalysis.interview_preparation.preparation_tips.length] || 'Ground in real engineering trade-offs',
+            difficulty: 'Medium',
+            expected_topics: fullAnalysis.skill_gap.matched_skills,
+          })),
+          behavioral_questions: fullAnalysis.interview_preparation.behavioral_questions.map((q, idx) => ({
+            id: `behav-${idx + 1}`,
+            category: 'behavioral',
+            question: q,
+            context_or_tip: 'Apply the STAR structure: Situation, Task, Action, and measurable Result.',
+            difficulty: 'Medium',
+          })),
+          project_questions: fullAnalysis.interview_preparation.project_deep_dive_topics.map((q, idx) => ({
+            id: `proj-${idx + 1}`,
+            category: 'project',
+            question: q,
+            context_or_tip: 'Be ready to defend architecture and trade-offs.',
+            difficulty: 'Medium',
+          })),
+          career_specific_questions: [],
+          total_questions_count: fullAnalysis.interview_preparation.technical_questions.length + fullAnalysis.interview_preparation.behavioral_questions.length,
+          summary: `Mock interview bank tailored to ${targetCareerName}`,
+        },
+        summaryItems: [
+          { label: 'Technical', value: `${fullAnalysis.interview_preparation.technical_questions.length} questions` },
+          { label: 'Behavioral', value: `${fullAnalysis.interview_preparation.behavioral_questions.length} questions` },
+        ],
+      })
+
+      // 12. Hydrate Job Node
+      const primaryJob = fullAnalysis.entry_level_jobs[0]
+      updateNodeIfExists('jobNode', {
+        status: 'success',
+        statusMessage: primaryJob?.job_title || 'Entry Roles Ready',
+        targetCareer: targetCareerName,
+        generatedAt: timestamp,
+        entryRoleData: {
+          id: 'job-1',
+          title: primaryJob?.job_title || `Associate ${targetCareerName}`,
+          experience_level: '0-2 Years (Fresher / Transition)',
+          typical_salary_range: primaryJob?.salary_range || '$60,000 - $85,000',
+          key_responsibilities: primaryJob?.typical_responsibilities || ['Develop features', 'Write unit tests'],
+          minimum_qualifications: primaryCareer?.qualification_requirements || 'Degree or verified coding portfolio',
+          interview_focus_areas: fullAnalysis.skill_gap.missing_skills.slice(0, 3),
+          is_demo_blueprint: false,
+        },
+        summaryItems: [
+          { label: 'Target', value: primaryJob?.job_title || 'Associate Role' },
+          { label: 'Range', value: primaryJob?.salary_range || 'Benchmark' },
+        ],
+      })
+
+      // 13. Hydrate Career Growth Node
+      updateNodeIfExists('careerGrowthNode', {
+        status: 'success',
+        statusMessage: `${fullAnalysis.career_growth.length} Growth Stages`,
+        targetCareer: targetCareerName,
+        generatedAt: timestamp,
+        stagesData: fullAnalysis.career_growth.map((cg, idx) => ({
+          stage_level: idx + 1,
+          stage_name: cg.stage_name,
+          role_type: idx === 0 ? 'entry' : idx === 1 ? 'mid' : idx === 2 ? 'senior' : 'specialist_lead',
+          experience_expectations: cg.timeline,
+          years_of_experience: cg.timeline,
+          expected_capabilities: cg.key_responsibilities,
+          skills_required_for_next_stage: cg.skills_required_for_next_level,
+          possible_specialization: [],
+          upskilling_recommendations: cg.skills_required_for_next_level,
+          target_compensation_range: 'Market benchmark progression',
+          key_promotion_milestones: cg.key_responsibilities,
+        })),
+        summaryItems: [
+          { label: 'Stages', value: `${fullAnalysis.career_growth.length} Progression Levels` },
+          { label: 'Ladder', value: fullAnalysis.career_growth[fullAnalysis.career_growth.length - 1]?.stage_name || 'Leadership' },
         ],
       })
 
       setSubmissionFeedback({
         type: 'success',
-        message: `Successfully discovered ${responseData.careers.length} career pathways!`,
+        message: `Career discovery & complete 12-stage workflow synchronized for ${targetCareerName}!`,
       })
     } else {
       onUpdateNodeData(selectedNode.id, {
@@ -348,7 +610,7 @@ export function NodeConfigPanel({
       })
       setSubmissionFeedback({
         type: 'error',
-        message: result.error || 'Failed to execute AI Career Discovery.',
+        message: result.error || 'Failed to execute AI Career Orchestration.',
       })
     }
   }

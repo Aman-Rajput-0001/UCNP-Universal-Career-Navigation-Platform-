@@ -44,3 +44,7 @@ backend/pg_data/
 *.sqlite
 *.sqlite3
 *.db
+
+# Vercel
+.vercel
+

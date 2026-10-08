@@ -745,5 +745,86 @@ export interface MarketTrendsNodeData extends WorkflowNodeData {
   generatedAt?: string
 }
 
+// ==========================================
+// Full AI Career Analysis Orchestration Types
+// ==========================================
+export interface LearningStepItem {
+  step_number: number
+  title: string
+  description: string
+  skills_covered: string[]
+  duration: string
+  learning_resources: string[]
+  practice_drill: string
+}
+
+export interface ProjectItem {
+  title: string
+  difficulty: string
+  description: string
+  technologies: string[]
+  portfolio_value: string
+}
+
+export interface CertificationItem {
+  name: string
+  issuer: string
+  importance: string
+  cost_level: string
+  description: string
+}
+
+export interface InternshipPathItem {
+  target_roles: string[]
+  timing_window: string
+  prerequisites: string[]
+  conversion_strategy: string
+}
+
+export interface ResumeGuidance {
+  headline: string
+  summary: string
+  top_keywords: string[]
+  recommended_sections: string[]
+  action_bullet_points: string[]
+}
+
+export interface InterviewPreparation {
+  technical_questions: string[]
+  behavioral_questions: string[]
+  project_deep_dive_topics: string[]
+  preparation_tips: string[]
+}
+
+export interface EntryLevelJob {
+  job_title: string
+  typical_responsibilities: string[]
+  salary_range: string
+  target_companies: string
+}
+
+export interface CareerGrowthStage {
+  stage_name: string
+  timeline: string
+  key_responsibilities: string[]
+  skills_required_for_next_level: string[]
+}
+
+export interface FullCareerAnalysisResponse {
+  career_options: CareerDiscoveryItem[]
+  skill_gap: SkillGapResponse
+  recommended_career_goal: string
+  roadmap: string[]
+  learning_steps: LearningStepItem[]
+  projects: ProjectItem[]
+  certifications: CertificationItem[]
+  internship_path: InternshipPathItem
+  resume_guidance: ResumeGuidance
+  interview_preparation: InterviewPreparation
+  entry_level_jobs: EntryLevelJob[]
+  career_growth: CareerGrowthStage[]
+}
+
+
 
 

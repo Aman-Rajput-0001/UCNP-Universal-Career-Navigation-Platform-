@@ -9,21 +9,21 @@ function getEligibilityBadge(level: string) {
   switch (level) {
     case 'direct':
       return {
-        text: 'Direct Entry',
+        text: '🟢 Direct',
         color: '#34d399',
         bg: 'rgba(16, 185, 129, 0.15)',
         border: 'rgba(16, 185, 129, 0.3)',
       }
     case 'additional_requirements':
       return {
-        text: 'Upskilling Required',
+        text: '🟡 Additional Requirements',
         color: '#facc15',
         bg: 'rgba(234, 179, 8, 0.15)',
         border: 'rgba(234, 179, 8, 0.3)',
       }
     case 'restricted':
       return {
-        text: 'Restricted / Statutory Bar',
+        text: '🔴 Restricted',
         color: '#f87171',
         bg: 'rgba(239, 68, 68, 0.15)',
         border: 'rgba(239, 68, 68, 0.3)',

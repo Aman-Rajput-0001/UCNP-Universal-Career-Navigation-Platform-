@@ -4,6 +4,7 @@ from app.database import get_db
 from app.schemas.career import (
     CareerDiscoveryRequest,
     CareerDiscoveryResponse,
+    FullCareerAnalysisResponse,
     EligibilityCheckRequest,
     EligibilityCheckResponse,
     SkillGapRequest,
@@ -32,6 +33,19 @@ async def discover_careers(
     db: Session = Depends(get_db),
 ) -> CareerDiscoveryResponse:
     return await default_career_discovery_service.discover_careers(request, db=db)
+
+
+@router.post(
+    "/career/orchestrate",
+    response_model=FullCareerAnalysisResponse,
+    summary="Unified AI Orchestrator providing complete 12-part structured career analysis",
+)
+async def orchestrate_career(
+    request: CareerDiscoveryRequest,
+    db: Session = Depends(get_db),
+) -> FullCareerAnalysisResponse:
+    return await default_career_discovery_service.orchestrate_career_analysis(request, db=db)
+
 
 
 @router.post(

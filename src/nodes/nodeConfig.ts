@@ -56,7 +56,7 @@ export function getStatusColorConfig(status?: 'GREEN' | 'YELLOW' | 'RED') {
   switch (status) {
     case 'GREEN':
       return {
-        badgeText: 'GREEN • DIRECTLY ACCESSIBLE',
+        badgeText: '🟢 Direct',
         textColor: '#34d399',
         bgColor: 'rgba(16, 185, 129, 0.15)',
         borderColor: 'rgba(16, 185, 129, 0.4)',
@@ -64,7 +64,7 @@ export function getStatusColorConfig(status?: 'GREEN' | 'YELLOW' | 'RED') {
       }
     case 'YELLOW':
       return {
-        badgeText: 'YELLOW • POSSIBLE WITH UPSKILLING',
+        badgeText: '🟡 Additional Requirements',
         textColor: '#facc15',
         bgColor: 'rgba(234, 179, 8, 0.15)',
         borderColor: 'rgba(234, 179, 8, 0.4)',
@@ -72,7 +72,7 @@ export function getStatusColorConfig(status?: 'GREEN' | 'YELLOW' | 'RED') {
       }
     case 'RED':
       return {
-        badgeText: 'RED • RESTRICTED ENTRY / BARRIER',
+        badgeText: '🔴 Restricted',
         textColor: '#f87171',
         bgColor: 'rgba(239, 68, 68, 0.15)',
         borderColor: 'rgba(239, 68, 68, 0.4)',

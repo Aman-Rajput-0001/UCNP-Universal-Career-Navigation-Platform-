@@ -28,7 +28,6 @@ import {
 } from '../services/workflowStorage'
 import {
   checkBackendHealth,
-  fetchCareerPathwayApi,
   fetchRoadmapProgressApi,
   simulateCareerApi,
 } from '../services/api'
@@ -409,6 +408,7 @@ export function WorkflowCanvas() {
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null)
   const [isCompareOpen, setIsCompareOpen] = useState(false)
   const [isMockModalOpen, setIsMockModalOpen] = useState(false)
+  const [customWhatIfInput, setCustomWhatIfInput] = useState('')
 
   // Verify backend health on mount and periodically
   useEffect(() => {
@@ -751,230 +751,361 @@ export function WorkflowCanvas() {
     setToastMessage('Workflow deleted')
   }, [nodes.length])
 
-  const handleGenerateCareerProgressionPathway = useCallback(async () => {
-    // Determine target career and profile from nodes
+  const handleGenerateCareerProgressionPathway = useCallback(() => {
+    // Collect profile data if user already filled it out, otherwise use clean defaults
     const profileNode = nodes.find((n) => n.type === 'studentProfileNode')
     const profileData = (profileNode?.data || {}) as StudentProfileNodeData
-
-    const roadmapNode = nodes.find((n) => n.type === 'aiRoadmapNode')
-    const targetCareer =
-      (roadmapNode?.data as any)?.targetCareer ||
-      profileData.careerGoal ||
-      'Full Stack Developer'
-
-    const candidateSkills = (profileData.skills || 'Python, SQL, React')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-
-    setToastMessage('Building Career Progression Chain...')
-
-    const res = await fetchCareerPathwayApi({
-      career_name: targetCareer,
-      candidate_skills: candidateSkills,
-      education_level: profileData.educationLevel || "Bachelor's Degree",
-    })
-
-    if (!res.success || !res.data) {
-      setToastMessage(res.error || 'Failed to generate pathway')
-      return
-    }
-
-    const pathwayData = res.data
     const timestamp = Date.now()
 
-    // Base position anchor with n8n-style spacing
-    const startX = 180
-    const startY = 380
-    const xGap = 360
-
-    // Progression: Skills → Projects → Portfolio → Resume → Internship → Entry-level role → Career growth
-    const pathwayNodes: Node<WorkflowNodeData>[] = [
+    // 14 Core Workflow Nodes structured in an ergonomic 4-row layout:
+    // INPUT -> DISCOVERY -> ANALYSIS -> GOAL -> ROADMAP -> EXECUTION -> CAREER GROWTH
+    const coreNodes: Node<WorkflowNodeData>[] = [
+      // 1. INPUT
       {
-        id: `prog-skills-${timestamp}`,
+        id: `student-profile-${timestamp}`,
         type: 'studentProfileNode',
-        position: { x: startX, y: startY },
+        position: { x: 100, y: 140 },
         data: {
-          title: 'Step 1: Core Skills',
-          description: 'Foundation competencies & skill baseline',
+          title: 'Student Profile',
+          description: 'Education, strengths & career preferences',
           category: 'input',
-          icon: '⚡',
-          status: 'success',
-          statusMessage: 'Baseline Verified',
+          icon: '🎓',
+          status: 'idle',
           educationLevel: profileData.educationLevel || "Bachelor's Degree",
-          skills: candidateSkills.join(', '),
-          careerGoal: targetCareer,
+          degreeOrCourse: profileData.degreeOrCourse || 'B.Tech',
+          branchOrSubject: profileData.branchOrSubject || 'Computer Science',
+          currentYear: profileData.currentYear || '3rd Year',
+          skills: profileData.skills || 'Python, SQL, React',
+          interests: profileData.interests || 'Machine Learning, Web Development',
+          strengths: profileData.strengths || 'Analytical Thinking, Fast Learner',
+          weaknesses: profileData.weaknesses || 'Networking, Public Speaking',
+          careerGoal: profileData.careerGoal || 'AI Engineer / Full Stack Developer',
+          availableTime: profileData.availableTime || '15 hrs/week',
           summaryItems: [
-            { label: 'Role Focus', value: targetCareer },
-            { label: 'Skills', value: `${candidateSkills.length} identified` },
+            { label: 'Category', value: 'INPUT' },
+            { label: 'Focus', value: 'Background & Skills' },
           ],
         } as StudentProfileNodeData,
       },
+      // 2. DISCOVERY
       {
-        id: `prog-projects-${timestamp}`,
-        type: 'projectsNode',
-        position: { x: startX + xGap, y: startY },
+        id: `career-discovery-${timestamp}`,
+        type: 'careerDiscoveryNode',
+        position: { x: 460, y: 140 },
         data: {
-          title: 'Step 2: Proof-of-Work Projects',
-          description: 'Hands-on applied portfolio building',
+          title: 'Career Discovery',
+          description: 'Discover viable careers irrespective of degree limitations',
+          category: 'discovery',
+          icon: '🧭',
+          status: 'idle',
+          summaryItems: [
+            { label: 'Category', value: 'DISCOVERY' },
+            { label: 'Scope', value: 'Skill & Interest Matching' },
+          ],
+        },
+      },
+      // 3. ANALYSIS
+      {
+        id: `eligibility-checker-${timestamp}`,
+        type: 'eligibilityCheckerNode',
+        position: { x: 820, y: 140 },
+        data: {
+          title: 'Eligibility Checker',
+          description: 'Check eligibility criteria & non-degree entry routes',
+          category: 'analysis',
+          icon: '✅',
+          status: 'idle',
+          summaryItems: [
+            { label: 'Category', value: 'ANALYSIS' },
+            { label: 'Criteria', value: 'Degrees vs Skill routes' },
+          ],
+        },
+      },
+      {
+        id: `skill-gap-analysis-${timestamp}`,
+        type: 'skillGapAnalysisNode',
+        position: { x: 1180, y: 140 },
+        data: {
+          title: 'Skill Gap Analysis',
+          description: 'Identify missing core and emerging skill gaps',
+          category: 'analysis',
+          icon: '📊',
+          status: 'idle',
+          summaryItems: [
+            { label: 'Category', value: 'ANALYSIS' },
+            { label: 'Benchmark', value: 'Target Competencies' },
+          ],
+        },
+      },
+      // 4. GOAL
+      {
+        id: `career-goal-${timestamp}`,
+        type: 'careerGoalNode',
+        position: { x: 1180, y: 390 },
+        data: {
+          title: 'Career Goal',
+          description: 'Target role, expected timeline & compensation',
+          category: 'career',
+          icon: '🎯',
+          status: 'idle',
+          summaryItems: [
+            { label: 'Category', value: 'GOAL' },
+            { label: 'Target', value: profileData.careerGoal || 'Full Stack Developer / AI' },
+          ],
+        },
+      },
+      // 5. ROADMAP
+      {
+        id: `ai-roadmap-${timestamp}`,
+        type: 'aiRoadmapNode',
+        position: { x: 820, y: 390 },
+        data: {
+          title: 'AI Roadmap',
+          description: 'Step-by-step personalized career transition plan',
+          category: 'roadmap',
+          icon: '🗺️',
+          status: 'idle',
+          targetCareer: profileData.careerGoal || 'Full Stack Developer',
+          summaryItems: [
+            { label: 'Category', value: 'ROADMAP' },
+            { label: 'Plan', value: 'Adaptive Milestones' },
+          ],
+        } as AIRoadmapNodeData,
+      },
+      // 6. EXECUTION
+      {
+        id: `learning-${timestamp}`,
+        type: 'learningNode',
+        position: { x: 460, y: 390 },
+        data: {
+          title: 'Learning',
+          description: 'Curated courses, docs, tutorials & practice material',
+          category: 'learning',
+          icon: '📚',
+          status: 'idle',
+          summaryItems: [
+            { label: 'Category', value: 'EXECUTION' },
+            { label: 'Content', value: 'Courses & Tutorials' },
+          ],
+        },
+      },
+      {
+        id: `projects-${timestamp}`,
+        type: 'projectsNode',
+        position: { x: 100, y: 390 },
+        data: {
+          title: 'Projects',
+          description: 'Proof-of-work project suggestions with GitHub guidance',
           category: 'learning',
           icon: '🛠️',
-          status: 'success',
-          statusMessage: 'Project Blueprints',
-          targetCareer,
-          targetSkills: candidateSkills,
+          status: 'idle',
           summaryItems: [
-            { label: 'Projects', value: '2 Curated' },
-            { label: 'Track', value: 'Production-ready' },
+            { label: 'Category', value: 'EXECUTION' },
+            { label: 'Portfolio', value: 'Production Blueprints' },
           ],
         },
       },
       {
-        id: `prog-portfolio-${timestamp}`,
-        type: 'projectsNode',
-        position: { x: startX + xGap * 2, y: startY },
+        id: `certification-${timestamp}`,
+        type: 'certificationNode',
+        position: { x: 100, y: 640 },
         data: {
-          title: 'Step 3: Live Portfolio',
-          description: 'Deploy live demos, GitHub repos & technical writeups',
+          title: 'Certification',
+          description: 'Recognized industry credentials and accreditations',
           category: 'learning',
-          icon: '🌐',
-          status: 'success',
-          statusMessage: 'Showcase Ready',
-          targetCareer,
+          icon: '📜',
+          status: 'idle',
           summaryItems: [
-            { label: 'Artifacts', value: 'GitHub + Live Demo' },
-            { label: 'Evidence', value: 'Measurable Impact' },
+            { label: 'Category', value: 'EXECUTION' },
+            { label: 'Validation', value: 'Industry Credentials' },
           ],
         },
       },
       {
-        id: `prog-resume-${timestamp}`,
-        type: 'resumeNode',
-        position: { x: startX + xGap * 3, y: startY },
-        data: {
-          title: 'Step 4: Tailored Resume',
-          description: 'ATS-optimized resume showcasing verified project impact',
-          category: 'action',
-          icon: '📄',
-          status: 'success',
-          statusMessage: 'ATS Optimized',
-          summaryItems: [
-            { label: 'Format', value: 'Action-verb / Metric first' },
-            { label: 'Target', value: targetCareer },
-          ],
-        },
-      },
-      {
-        id: `prog-internship-${timestamp}`,
+        id: `internship-${timestamp}`,
         type: 'internshipNode',
-        position: { x: startX + xGap * 4, y: startY },
+        position: { x: 460, y: 640 },
         data: {
-          title: 'Step 5: Internship',
-          description: pathwayData.internship.title,
+          title: 'Internship',
+          description: 'Entry-level work opportunities and experiential learning',
           category: 'action',
           icon: '💼',
-          status: 'success',
-          statusMessage: 'Blueprint Ready',
-          targetCareer,
-          internshipData: pathwayData.internship,
+          status: 'idle',
           summaryItems: [
-            { label: 'Type', value: pathwayData.internship.organization_type },
-            { label: 'Stipend', value: pathwayData.internship.stipend_range },
-            { label: 'PPO', value: pathwayData.internship.conversion_potential },
+            { label: 'Category', value: 'EXECUTION' },
+            { label: 'Hands-on', value: 'Industry Apprenticeship' },
           ],
         },
       },
       {
-        id: `prog-entryrole-${timestamp}`,
-        type: 'jobNode',
-        position: { x: startX + xGap * 5, y: startY },
+        id: `resume-${timestamp}`,
+        type: 'resumeNode',
+        position: { x: 820, y: 640 },
         data: {
-          title: 'Step 6: Entry-level Role',
-          description: pathwayData.entry_role.title,
+          title: 'Resume',
+          description: 'Skill-first ATS resume generation & optimization',
+          category: 'action',
+          icon: '📄',
+          status: 'idle',
+          summaryItems: [
+            { label: 'Category', value: 'EXECUTION' },
+            { label: 'Format', value: 'ATS Tailored' },
+          ],
+        },
+      },
+      {
+        id: `interview-${timestamp}`,
+        type: 'interviewNode',
+        position: { x: 1180, y: 640 },
+        data: {
+          title: 'Interview',
+          description: 'Role-specific mock interview simulations & feedback',
+          category: 'action',
+          icon: '🎤',
+          status: 'idle',
+          summaryItems: [
+            { label: 'Category', value: 'EXECUTION' },
+            { label: 'Prep', value: 'Technical & Behavioral' },
+          ],
+        },
+      },
+      // 7. CAREER GROWTH
+      {
+        id: `job-${timestamp}`,
+        type: 'jobNode',
+        position: { x: 1180, y: 890 },
+        data: {
+          title: 'Job',
+          description: 'Curated job opportunities matched to candidate capabilities',
           category: 'career',
           icon: '🚀',
-          status: 'success',
-          statusMessage: 'Role Archetype Ready',
-          targetCareer,
-          entryRoleData: pathwayData.entry_role,
+          status: 'idle',
           summaryItems: [
-            { label: 'Level', value: pathwayData.entry_role.experience_level },
-            { label: 'Comp', value: pathwayData.entry_role.typical_salary_range },
+            { label: 'Category', value: 'CAREER GROWTH' },
+            { label: 'Target Role', value: 'Full-time Placement' },
           ],
         },
       },
       {
-        id: `prog-growth-${timestamp}`,
+        id: `career-growth-${timestamp}`,
         type: 'careerGrowthNode',
-        position: { x: startX + xGap * 6, y: startY },
+        position: { x: 820, y: 890 },
         data: {
-          title: 'Step 7: Career Growth',
-          description: 'Multi-stage seniority ladder and promotion benchmarks',
+          title: 'Career Growth',
+          description: 'Long-term promotion, upskilling and leadership tracking',
           category: 'career',
           icon: '📈',
-          status: 'success',
-          statusMessage: 'Ladder Ready',
-          targetCareer,
-          stagesData: pathwayData.career_stages,
-          progressionChain: pathwayData.progression_chain,
+          status: 'idle',
           summaryItems: [
-            { label: 'Stages', value: `${pathwayData.career_stages.length} Tiers` },
-            { label: 'Path', value: 'Entry → Mid → Senior → Lead → Mgt' },
+            { label: 'Category', value: 'CAREER GROWTH' },
+            { label: 'Ladder', value: 'Promotion & Seniority' },
           ],
         },
       },
     ]
 
-    // Create 6 directed edges connecting the 7 stages
-    const pathwayEdges: Edge[] = [
+    // Directed edges connecting the complete workflow sequentially:
+    // 0: Profile -> 1: Discovery -> 2: Eligibility -> 3: Skill Gap -> 4: Career Goal ->
+    // 5: AI Roadmap -> 6: Learning -> 7: Projects -> 8: Certification -> 9: Internship ->
+    // 10: Resume -> 11: Interview -> 12: Job -> 13: Growth
+    const coreEdges: Edge[] = [
       {
-        id: `edge-prog-1-2-${timestamp}`,
-        source: pathwayNodes[0].id,
-        target: pathwayNodes[1].id,
+        id: `edge-core-1-2-${timestamp}`,
+        source: coreNodes[0].id,
+        target: coreNodes[1].id,
+        animated: true,
+        style: { stroke: '#4f46e5', strokeWidth: 2.5 },
+      },
+      {
+        id: `edge-core-2-3-${timestamp}`,
+        source: coreNodes[1].id,
+        target: coreNodes[2].id,
+        animated: true,
+        style: { stroke: '#4f46e5', strokeWidth: 2.5 },
+      },
+      {
+        id: `edge-core-3-4-${timestamp}`,
+        source: coreNodes[2].id,
+        target: coreNodes[3].id,
+        animated: true,
+        style: { stroke: '#4f46e5', strokeWidth: 2.5 },
+      },
+      {
+        id: `edge-core-4-5-${timestamp}`,
+        source: coreNodes[3].id,
+        target: coreNodes[4].id,
         animated: true,
         style: { stroke: '#6366f1', strokeWidth: 2.5 },
       },
       {
-        id: `edge-prog-2-3-${timestamp}`,
-        source: pathwayNodes[1].id,
-        target: pathwayNodes[2].id,
+        id: `edge-core-5-6-${timestamp}`,
+        source: coreNodes[4].id,
+        target: coreNodes[5].id,
         animated: true,
         style: { stroke: '#6366f1', strokeWidth: 2.5 },
       },
       {
-        id: `edge-prog-3-4-${timestamp}`,
-        source: pathwayNodes[2].id,
-        target: pathwayNodes[3].id,
+        id: `edge-core-6-7-${timestamp}`,
+        source: coreNodes[5].id,
+        target: coreNodes[6].id,
         animated: true,
         style: { stroke: '#6366f1', strokeWidth: 2.5 },
       },
       {
-        id: `edge-prog-4-5-${timestamp}`,
-        source: pathwayNodes[3].id,
-        target: pathwayNodes[4].id,
+        id: `edge-core-7-8-${timestamp}`,
+        source: coreNodes[6].id,
+        target: coreNodes[7].id,
+        animated: true,
+        style: { stroke: '#06b6d4', strokeWidth: 2.5 },
+      },
+      {
+        id: `edge-core-8-9-${timestamp}`,
+        source: coreNodes[7].id,
+        target: coreNodes[8].id,
+        animated: true,
+        style: { stroke: '#06b6d4', strokeWidth: 2.5 },
+      },
+      {
+        id: `edge-core-9-10-${timestamp}`,
+        source: coreNodes[8].id,
+        target: coreNodes[9].id,
+        animated: true,
+        style: { stroke: '#06b6d4', strokeWidth: 2.5 },
+      },
+      {
+        id: `edge-core-10-11-${timestamp}`,
+        source: coreNodes[9].id,
+        target: coreNodes[10].id,
         animated: true,
         style: { stroke: '#3b82f6', strokeWidth: 2.5 },
       },
       {
-        id: `edge-prog-5-6-${timestamp}`,
-        source: pathwayNodes[4].id,
-        target: pathwayNodes[5].id,
+        id: `edge-core-11-12-${timestamp}`,
+        source: coreNodes[10].id,
+        target: coreNodes[11].id,
         animated: true,
         style: { stroke: '#3b82f6', strokeWidth: 2.5 },
       },
       {
-        id: `edge-prog-6-7-${timestamp}`,
-        source: pathwayNodes[5].id,
-        target: pathwayNodes[6].id,
+        id: `edge-core-12-13-${timestamp}`,
+        source: coreNodes[11].id,
+        target: coreNodes[12].id,
+        animated: true,
+        style: { stroke: '#10b981', strokeWidth: 2.5 },
+      },
+      {
+        id: `edge-core-13-14-${timestamp}`,
+        source: coreNodes[12].id,
+        target: coreNodes[13].id,
         animated: true,
         style: { stroke: '#10b981', strokeWidth: 2.5 },
       },
     ]
 
-    setNodes((prev) => [...prev, ...pathwayNodes])
-    setEdges((prev) => [...prev, ...pathwayEdges])
-    setSelectedNodeId(pathwayNodes[4].id) // Select Internship node
-    setToastMessage('Progression Pathway: Skills → Projects → Portfolio → Resume → Internship → Job → Growth instantiated!')
+    setNodes(coreNodes)
+    setEdges(coreEdges)
+    setSelectedNodeId(coreNodes[0].id)
+    setToastMessage('Complete Core Workflow instantiated! (INPUT → DISCOVERY → ANALYSIS → GOAL → ROADMAP → EXECUTION → CAREER GROWTH)')
   }, [nodes])
 
   const handleSimulateAlternativeCareer = useCallback(async (careerName: string) => {
@@ -1045,11 +1176,99 @@ export function WorkflowCanvas() {
       })
     }
 
-    // Preserve primary roadmap completely, just add the new simulation node & edge
-    setNodes((prev) => [...prev, newSimulationNode])
+    setNodes((prev) => {
+      let updated = [...prev, newSimulationNode]
+
+      // If user chose to apply this What-If target career to the active roadmap or if roadmap node exists:
+      updated = updated.map((n) => {
+        if (n.type === 'careerGoalNode') {
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              status: 'success',
+              statusMessage: `What-If: ${simData.career}`,
+              summaryItems: [
+                { label: 'Target Role', value: simData.career },
+                { label: 'Simulated Path', value: `${simData.major_steps.length} Milestones` },
+              ],
+            },
+          }
+        }
+        if (n.type === 'aiRoadmapNode') {
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              status: 'success',
+              statusMessage: `Recalculated for ${simData.career}`,
+              targetCareer: simData.career,
+              roadmapResult: {
+                career_name: simData.career,
+                total_estimated_duration: `${simData.major_steps.length * 4} Weeks`,
+                summary: simData.estimated_path,
+                steps: simData.major_steps.map((ms) => ({
+                  id: `sim-step-${ms.step_number}`,
+                  title: ms.title,
+                  type: ms.phase.toLowerCase().includes('learn') ? 'learning' : ms.phase.toLowerCase().includes('project') ? 'project' : ms.phase.toLowerCase().includes('cert') ? 'certification' : 'job',
+                  description: ms.focus,
+                  prerequisites: ms.step_number > 1 ? [`sim-step-${ms.step_number - 1}`] : [],
+                  skills: simData.skill_gap.missing_skills.slice((ms.step_number - 1) * 2, ms.step_number * 2),
+                  estimated_duration: ms.estimated_duration,
+                  projects: [ms.deliverable],
+                  resources: ['Official documentation & practical guides'],
+                  completion_criteria: ms.deliverable,
+                })),
+              },
+              summaryItems: [
+                { label: 'Target Career', value: simData.career },
+                { label: 'Recalculated', value: `${simData.major_steps.length} Milestones` },
+              ],
+            } as AIRoadmapNodeData,
+          }
+        }
+        if (n.type === 'skillGapAnalysisNode') {
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              status: 'success',
+              statusMessage: `${simData.skill_gap.missing_skills.length} Gaps (${simData.skill_gap.skill_level})`,
+              targetCareer: simData.career,
+              skillGapResult: simData.skill_gap,
+              summaryItems: [
+                { label: 'Career', value: simData.career },
+                { label: 'Level', value: simData.skill_gap.skill_level },
+                { label: 'Missing', value: `${simData.skill_gap.missing_skills.length} skills` },
+              ],
+            },
+          }
+        }
+        if (n.type === 'eligibilityCheckerNode') {
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              status: 'success',
+              statusMessage: `Status: ${simData.eligibility.status}`,
+              targetCareer: simData.career,
+              eligibilityResult: simData.eligibility,
+              summaryItems: [
+                { label: 'Career', value: simData.career },
+                { label: 'Status', value: simData.eligibility.status },
+              ],
+            },
+          }
+        }
+        return n
+      })
+
+      return updated
+    })
+
     setEdges((prev) => [...prev, ...newEdges])
     setSelectedNodeId(newSimulationNode.id)
-    setToastMessage(`Simulated pathway for "${simData.career}" added to canvas!`)
+    setToastMessage(`Recalculated roadmap & pathway for "${simData.career}"!`)
   }, [nodes])
 
   const selectedNode = useMemo(
@@ -1335,6 +1554,52 @@ export function WorkflowCanvas() {
             >
               Govt
             </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <input
+                type="text"
+                value={customWhatIfInput}
+                onChange={(e) => setCustomWhatIfInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && customWhatIfInput.trim()) {
+                    handleSimulateAlternativeCareer(customWhatIfInput.trim())
+                    setCustomWhatIfInput('')
+                  }
+                }}
+                placeholder="Other career..."
+                style={{
+                  background: '#090d16',
+                  color: '#f8fafc',
+                  border: '1px solid #334155',
+                  borderRadius: '4px',
+                  padding: '2px 6px',
+                  fontSize: '10.5px',
+                  width: '90px',
+                  outline: 'none',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (customWhatIfInput.trim()) {
+                    handleSimulateAlternativeCareer(customWhatIfInput.trim())
+                    setCustomWhatIfInput('')
+                  }
+                }}
+                style={{
+                  background: '#6366f1',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '2px 6px',
+                  fontSize: '10.5px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+                title="Run What-If for entered career"
+              >
+                Go
+              </button>
+            </div>
           </div>
 
           {/* Canvas Storage & Reset Group */}

@@ -2,6 +2,7 @@ import type {
   StudentProfileForm,
   StudentProfileResponse,
   CareerDiscoveryResponse,
+  FullCareerAnalysisResponse,
   EligibilityCheckPayload,
   EligibilityCheckResponse,
   SkillGapPayload,
@@ -55,7 +56,12 @@ export interface CareerDiscoveryPayload {
   availableTime?: string
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
+// In production on Vercel, requests to /api route directly to the serverless function if VITE_API_BASE_URL is not set
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? ''
+    : 'http://127.0.0.1:8000')
 
 /**
  * Checks backend health endpoint
@@ -203,6 +209,59 @@ export async function discoverCareersApi(
     }
   }
 }
+
+/**
+ * Calls Unified AI Orchestrator providing complete 12-part career transition analysis
+ */
+export async function orchestrateCareerAnalysisApi(
+  payload: CareerDiscoveryPayload
+): Promise<{
+  success: boolean
+  data?: FullCareerAnalysisResponse
+  error?: string
+}> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/career/orchestrate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      let detail = `Error ${response.status}`
+      try {
+        const errorData = await response.json()
+        if (errorData.detail) {
+          detail = typeof errorData.detail === 'string'
+            ? errorData.detail
+            : JSON.stringify(errorData.detail)
+        }
+      } catch {
+        // ignore json error
+      }
+      return {
+        success: false,
+        error: detail,
+      }
+    }
+
+    const data: FullCareerAnalysisResponse = await response.json()
+    return {
+      success: true,
+      data,
+    }
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to orchestrate career transition analysis'
+    return {
+      success: false,
+      error: errorMsg,
+    }
+  }
+}
+
 
 /**
  * Calls authoritative eligibility checker endpoint
