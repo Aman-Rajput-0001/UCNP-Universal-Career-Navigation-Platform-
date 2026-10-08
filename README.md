@@ -1,4 +1,5 @@
 # 🎯 Universal Career Navigation Platform
+# Wait for Ai response we use free tier of vercel it response maybe late.
 
 > **A degree tells a student where they started. It should not decide where they can go.**
 
