@@ -753,9 +753,9 @@ export function NodeConfigPanel({
       // Update remaining step nodes and edges on the canvas
       if (onReplanRoadmapSteps) {
         const rootPos = selectedNode.position || { x: 300, y: 300 }
-        const startX = rootPos.x + 360 + currentCompleted.length * 320
+        const startX = rootPos.x + 360 + currentCompleted.length * 360
         const startY = rootPos.y
-        const stepSpacingX = 320
+        const stepSpacingX = 360
 
         const newRemainingNodes: Node<WorkflowNodeData>[] = []
         const newEdges: Edge[] = []
@@ -1141,30 +1141,57 @@ export function NodeConfigPanel({
   return (
     <aside
       style={{
-        width: '380px',
+        width: 'min(400px, 100vw)',
+        maxWidth: '100vw',
         height: '100%',
         backgroundColor: '#090d16',
         borderLeft: '1px solid #1e293b',
         display: 'flex',
         flexDirection: 'column',
-        zIndex: 20,
-        boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.5)',
+        zIndex: 25,
+        boxShadow: '-6px 0 24px rgba(0, 0, 0, 0.55)',
       }}
     >
       {/* Panel Header */}
       <div
         style={{
-          padding: '14px 16px',
+          padding: '12px 16px',
           borderBottom: '1px solid #1e293b',
+          backgroundColor: '#0b1120',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexShrink: 0,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '16px' }}>{selectedNode.data.icon as string || '⚙️'}</span>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: '13px', color: '#f8fafc' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: '#192233',
+              border: '1px solid #2d3b50',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              flexShrink: 0,
+            }}
+          >
+            {selectedNode.data.icon as string || '⚙️'}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: '13px',
+                color: '#f8fafc',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {selectedNode.data.title as string || 'Node Configuration'}
             </div>
             <div style={{ fontSize: '10px', color: '#64748b' }}>
@@ -1176,16 +1203,29 @@ export function NodeConfigPanel({
           onClick={onClose}
           type="button"
           style={{
-            background: 'transparent',
-            border: 'none',
+            background: '#131b2e',
+            border: '1px solid #2d3748',
             color: '#94a3b8',
             cursor: 'pointer',
-            fontSize: '16px',
-            padding: '4px 8px',
-            borderRadius: '4px',
+            fontSize: '14px',
+            width: '26px',
+            height: '26px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '6px',
             lineHeight: 1,
+            transition: 'all 0.15s ease',
           }}
-          title="Close Panel"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#f8fafc'
+            e.currentTarget.style.borderColor = '#3b82f6'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#94a3b8'
+            e.currentTarget.style.borderColor = '#2d3748'
+          }}
+          title="Close Inspector"
         >
           ✕
         </button>

@@ -203,24 +203,36 @@ export function WorkflowCanvas() {
 
   const handleAddNode = useCallback((nodeDef: NodeTypeDefinition) => {
     const id = `${nodeDef.type}-${Date.now()}`
-    const xPos = 400 + (Math.random() * 80 - 40)
-    const yPos = 240 + (Math.random() * 80 - 40)
+    
+    setNodes((nds) => {
+      let xPos = 380
+      let yPos = 200
 
-    const newNode: Node<WorkflowNodeData> = {
-      id,
-      type: nodeDef.type,
-      position: { x: xPos, y: yPos },
-      data: {
-        title: nodeDef.name,
-        description: nodeDef.description,
-        category: nodeDef.category,
-        icon: nodeDef.icon,
-        status: 'idle',
-        summaryItems: nodeDef.defaultSummary || [],
-      },
-    }
+      if (nds.length > 0) {
+        // Find rightmost node and place with 360px ergonomic spacing
+        const rightmost = nds.reduce((prev, curr) =>
+          curr.position.x > prev.position.x ? curr : prev
+        , nds[0])
+        xPos = rightmost.position.x + 360
+        yPos = rightmost.position.y + ((nds.length % 2 === 1) ? 30 : -20)
+      }
 
-    setNodes((nds) => [...nds, newNode])
+      const newNode: Node<WorkflowNodeData> = {
+        id,
+        type: nodeDef.type,
+        position: { x: xPos, y: yPos },
+        data: {
+          title: nodeDef.name,
+          description: nodeDef.description,
+          category: nodeDef.category,
+          icon: nodeDef.icon,
+          status: 'idle',
+          summaryItems: nodeDef.defaultSummary || [],
+        },
+      }
+      return [...nds, newNode]
+    })
+
     setSelectedNodeId(id)
   }, [])
 
@@ -616,25 +628,27 @@ export function WorkflowCanvas() {
       {/* Top Application Bar */}
       <header
         style={{
-          height: '48px',
+          minHeight: '52px',
           background: '#0b1120',
           borderBottom: '1px solid #1e293b',
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 16px',
+          padding: '8px 16px',
+          gap: '10px',
           zIndex: 10,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <button
             onClick={() => setIsLibraryOpen((prev) => !prev)}
             type="button"
             style={{
               background: isLibraryOpen ? '#1e3a8a' : '#1e293b',
               color: isLibraryOpen ? '#93c5fd' : '#cbd5e1',
-              border: '1px solid #334155',
-              padding: '6px 10px',
+              border: isLibraryOpen ? '1px solid #3b82f6' : '1px solid #334155',
+              padding: '6px 12px',
               borderRadius: '6px',
               cursor: 'pointer',
               fontSize: '12px',
@@ -642,13 +656,14 @@ export function WorkflowCanvas() {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              transition: 'all 0.15s ease',
             }}
           >
             <span>⚡</span>
             <span>{isLibraryOpen ? 'Hide Nodes' : 'Add Nodes'}</span>
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '18px' }}>🧭</span>
             <span style={{ fontWeight: 600, fontSize: '14px', letterSpacing: '-0.2px', color: '#f8fafc' }}>
               Career Navigator
@@ -666,16 +681,23 @@ export function WorkflowCanvas() {
               Workflow Canvas
             </span>
           </div>
+
+          <span style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span>•</span>
+            <span>{nodes.length} nodes</span>
+            <span>•</span>
+            <span>{edges.length} edges</span>
+          </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {/* Backend Status Indicator */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '3px 8px',
+              padding: '4px 8px',
               borderRadius: '6px',
               fontSize: '11px',
               fontWeight: 500,
@@ -707,11 +729,12 @@ export function WorkflowCanvas() {
             <span
               style={{
                 fontSize: '11px',
-                padding: '3px 8px',
-                borderRadius: '4px',
-                background: 'rgba(16, 185, 129, 0.15)',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                background: 'rgba(16, 185, 129, 0.18)',
                 color: '#34d399',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                fontWeight: 500,
               }}
             >
               ✓ {toastMessage}
@@ -734,6 +757,7 @@ export function WorkflowCanvas() {
               alignItems: 'center',
               gap: '6px',
               boxShadow: '0 2px 4px rgba(79, 70, 229, 0.3)',
+              transition: 'opacity 0.15s ease',
             }}
             title="Generate connected chain: Skills → Projects → Portfolio → Resume → Internship → Job → Growth"
           >
@@ -860,7 +884,12 @@ export function WorkflowCanvas() {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              boxShadow: '0 2px 4px rgba(37, 99, 235, 0.3)',
+              transition: 'background-color 0.15s ease',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+            title="Save workflow state to browser local storage"
           >
             💾 Save Workflow
           </button>
@@ -880,14 +909,20 @@ export function WorkflowCanvas() {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              transition: 'all 0.15s ease',
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#273549'
+              e.currentTarget.style.borderColor = '#475569'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#1e293b'
+              e.currentTarget.style.borderColor = '#334155'
+            }}
+            title="Load saved workflow state from storage"
           >
             📂 Load Workflow
           </button>
-
-          <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '6px' }}>
-            {nodes.length} nodes · {edges.length} edges
-          </span>
         </div>
       </header>
 
